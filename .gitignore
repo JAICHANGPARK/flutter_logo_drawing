@@ -18,6 +18,9 @@
 # Visual Studio Code related
 .vscode/
 
+#assets
+/assets
+
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/
@@ -68,3 +71,4 @@
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
