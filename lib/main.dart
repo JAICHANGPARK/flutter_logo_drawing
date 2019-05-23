@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:drawing_animation/drawing_animation.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:connectivity/connectivity.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,70 +21,88 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    super.initState();
+  String _connectionStatus = "Unknown";
+  final Connectivity _connectivity = new Connectivity();
+  StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  Future<void> initConnectivity() async {
+    ConnectivityResult result;
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+    if (!mounted) {
+      return;
+    }
+    _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    switch (result) {
+      case ConnectivityResult.wifi:
+        String wifiName, wifiBSSID, wifiIP;
+        try {
+          wifiName = await _connectivity.getWifiName();
+        } on PlatformException catch (e) {
+          print(e.toString());
+          wifiName = "Failed to get Wifi Name";
+        }
+
+        try {
+          wifiBSSID = await _connectivity.getWifiBSSID();
+        } on PlatformException catch (e) {
+          print(e.toString());
+          wifiBSSID = "Failed to get Wifi BSSID";
+        }
+
+        try {
+          wifiIP = await _connectivity.getWifiIP();
+        } on PlatformException catch (e) {
+          print(e.toString());
+          wifiIP = "Failed to get Wifi IP";
+        }
+
+        setState(() {
+          _connectionStatus = '$result\n'
+              'Wifi Name: $wifiName\n'
+              'Wifi BSSID: $wifiBSSID\n'
+              'Wifi IP: $wifiIP\n';
+        });
+        break;
+      case ConnectivityResult.mobile:
+        // TODO: Handle this case.
+        break;
+      case ConnectivityResult.none:
+        // TODO: Handle this case.
+        setState(() => _connectionStatus = result.toString());
+        break;
+      default:
+        setState(() => _connectionStatus = 'Failed to get connectivity.');
+        break;
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SvgDrawingWithCustomController("assets/logo_sample.svg"),
-      ),
-    );
-  }
-}
-
-class SvgDrawingWithCustomController extends StatefulWidget {
-  SvgDrawingWithCustomController(this.assetName);
-
-  final String assetName;
-
-  @override
-  SvgDrawingWithCustomControllerState createState() =>
-      SvgDrawingWithCustomControllerState();
-}
-
-class SvgDrawingWithCustomControllerState
-    extends State<SvgDrawingWithCustomController>
-    with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  bool _running = false;
-
-  @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    _controller = new AnimationController(
-      duration: Duration(seconds: 2),
-      vsync: this,
-    );
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // TODO: implement dispose
     super.dispose();
-  }
-
-  void _startAnimation() {
-    if (_running) {
-      _controller.stop();
-    } else {
-      _controller.stop();
-      _controller.repeat();
-    }
-    _running = !_running;
+    _connectivitySubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        decoration: new BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Center(
-          child: Text("hello"),
-        ));
+    // TODO: implement build
+    return Scaffold(
+      body: Center(child: Text('Connection Status: $_connectionStatus')),
+    );
   }
 }
