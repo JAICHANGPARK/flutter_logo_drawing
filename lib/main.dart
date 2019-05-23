@@ -35,6 +35,7 @@ class SvgDrawingWithCustomController extends StatefulWidget {
   SvgDrawingWithCustomController(this.assetName);
 
   final String assetName;
+
   @override
   SvgDrawingWithCustomControllerState createState() =>
       SvgDrawingWithCustomControllerState();
@@ -77,21 +78,8 @@ class SvgDrawingWithCustomControllerState
         decoration: new BoxDecoration(
           color: Colors.white,
         ),
-        child: GestureDetector(
-            onTap: () => _startAnimation(),
-            behavior: HitTestBehavior.translucent,
-            //AnimatedDrawing with a custom controller
-            child: Transform(
-              transform: Matrix4.,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: AnimatedDrawing.svg(
-                  this.widget.assetName,
-                  controller: this._controller,
-                  lineAnimation: LineAnimation.allAtOnce,
-                  animationCurve: Curves.easeIn,
-                ),
-              ),
-            )));
+        child: Center(
+          child: Text("hello"),
+        ));
   }
 }
